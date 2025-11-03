@@ -1,0 +1,49 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Charity {
+  id           String   @id @default(cuid())
+  name         String
+  slug         String   @unique
+  description  String
+  location     String?
+  verified     Boolean  @default(false)
+  website      String?
+  logoUrl      String?
+  createdAt    DateTime @default(now())
+  links        Link[]
+  posts        Post[]
+}
+
+model Link {
+  id        String   @id @default(cuid())
+  platform  String
+  url       String
+  charityId String
+  charity   Charity  @relation(fields: [charityId], references: [id], onDelete: Cascade)
+}
+
+model Post {
+  id           String   @id @default(cuid())
+  createdAt    DateTime @default(now())
+  kind         PostKind
+  title        String
+  body         String
+  location     String?
+  charityId    String?
+  charity      Charity? @relation(fields: [charityId], references: [id], onDelete: SetNull)
+  tags         String[]
+  contactEmail String?
+}
+
+enum PostKind {
+  NEED
+  OFFER
+  UPDATE
+}
